@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/govsandhu/tinyapp_project/issues"
   },
-  "homepage": "https://github.com/govsandhu/tinyapp_project#readme"
+  "homepage": "https://github.com/govsandhu/tinyapp_project#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
