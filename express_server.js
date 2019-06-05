@@ -50,6 +50,15 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     res.redirect('/urls');
 });
 
+app.post('/urls/:shortURL', (req, res) => {
+    const updatedLongURL = req.body.updatedLongURL;
+    const shortURL = req.params.shortURL;
+    if (updatedLongURL) {
+        urlDatabase[shortURL] = updatedLongURL
+    }
+    res.redirect('/urls');
+})
+
 app.get("/urls/new", (req, res) => {
     res.render("urls_new");
 });

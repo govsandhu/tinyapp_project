@@ -13,13 +13,15 @@
     <% include ./partials/_header %>
     <a href='#'>Create New TinyURL</a>
     <br>
-    <h5> My URLs </h5>
+    <br>
+    <h4> My URLs </h4>
     <ul>
         <% for (let i in urls) { %>
         <li>
             <%= i + ": " + urls[i] %>
-            <form method="POST" action="/urls/<%= i %>/delete">
-                <button type="submit">Delete URL</button>
+            <a class="btn btn-primary btn-sm" href="http://localhost:8080/urls/<%= i %>" role="button">Edit</a>
+            <form method="POST" action="/urls/<%= i %>/delete" style="display: inline-block">
+                <button type="submit" class="btn btn-primary btn-sm">Delete URL</button>
             </form>
         </li>
         <% }; %>

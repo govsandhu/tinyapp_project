@@ -16,10 +16,11 @@
     <a href='#'>Create New TinyURL</a>
     <br>
     <strong>
-        <%= "TinyURL for " + longURL %>
+        <%= `TinyURL for ${longURL}: ${shortURL}` %>
     </strong>
-    <br>
-    <%= shortURL %>
+    <form method="POST" action="/urls/<%= shortURL %>">
+        <input type="text" placeholder="Update your URL here!" name="updatedLongURL">
+        <button type="submit">Update</button>
 </body>
 
 </html>
