@@ -54,7 +54,7 @@ app.post("/urls", (req, res) => {
     let newShortURL = generateRandomString()
     urlDatabase[newShortURL] = newLongURL
 
-    res.redirect(`/urls/${newShortURL}`); // Respond with 'Ok' (we will replace this)
+    res.redirect(`/urls/${newShortURL}`);
 });
 
 
