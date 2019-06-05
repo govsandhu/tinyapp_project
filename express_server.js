@@ -50,7 +50,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-    console.log(req.body); // Log the POST request body to the console
+    let newLongURL = req.body.longURL
+    let newShortURL = generateRandomString()
+    urlDatabase[newShortURL] = newLongURL
+
     res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
