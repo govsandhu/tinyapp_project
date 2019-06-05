@@ -10,9 +10,16 @@
 </head>
 
 <body style="font-size:20px; padding:50px;">
+    <header>
+        <% include ./partials/_header %>
+    </header>
     <a href='#'>Create New TinyURL</a>
+    <br>
+    <strong>
+        <%= "TinyURL for " + longURL %>
+    </strong>
+    <br>
     <%= shortURL %>
-    <%= longURL %>
 </body>
 
 </html>

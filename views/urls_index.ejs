@@ -10,7 +10,10 @@
 </head>
 
 <body style="font-size:20px; padding:50px;">
+    <% include ./partials/_header %>
     <a href='#'>Create New TinyURL</a>
+    <br>
+    <h5> My URLs </h5>
     <ul>
         <% for (let i in urls) { %>
         <li>
