@@ -26,7 +26,19 @@ const users = {
     }
 }
 
-
+const doesUserNameExist = (userEmail) => {
+    let userExists = false;
+    for (let id in users) {
+        if (users[id].email === userEmail) {
+            userExists = true;
+            break;
+        }
+    }
+    return userExists
+}
+// const emailFinder = (email) => {
+//   if (users[])
+// }
 
 const generateRandomString = function() {
 
@@ -59,17 +71,31 @@ app.get("/register", (req, res) => {
     res.render("register", templateVars)
 })
 app.post('/register', (req, res) => {
-    let randomUserID = generateRandomString();
     const userEmail = req.body.email;
     const password = req.body.password
-    users[randomUserID] = {
-        'id': randomUserID,
-        'email': userEmail,
-        'password': password
-    };
-    res.cookie('user_id', randomUserID);
-    res.redirect('/urls');
+
+    if (!userEmail || !password) {
+        res.status(400).send("400: One of the fields is empty! Please enter a valid username and password")
+    } else if (validateUsers(userEmail)) {
+        res.status(400).send("400: The email entered already exists! Please enter a valid email address")
+    } else {
+        let randomUserID = generateRandomString();
+        users[randomUserID] = {
+            'id': randomUserID,
+            'email': userEmail,
+            'password': password
+        }
+        res.cookie('user_id', randomUserID);
+        res.redirect('/urls');
+    }
+    console.log(users)
 });
+
+
+
+
+
+
 
 app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[req.params.shortURL];
