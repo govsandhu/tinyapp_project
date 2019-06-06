@@ -1,6 +1,6 @@
 <H1> TinyApp </H1>
-<% if (username !== undefined) { %>
-<%= `Logged In As: ${username}` %>
+<% if (userObject.email !== undefined) { %>
+<%= `Logged In As: ${userObject.email}` %>
 <form method="POST" action="/logout" style="display: inline-block">
     <button type="submit" class="btn btn-primary btn-sm">Logout</button>
 </form>

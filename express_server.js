@@ -26,6 +26,8 @@ const users = {
     }
 }
 
+
+
 const doesUserNameExist = (userEmail) => {
     let userExists = false;
     for (let id in users) {
@@ -36,9 +38,8 @@ const doesUserNameExist = (userEmail) => {
     }
     return userExists
 }
-// const emailFinder = (email) => {
-//   if (users[])
-// }
+
+
 
 const generateRandomString = function() {
 
@@ -55,12 +56,14 @@ const generateRandomString = function() {
 }
 
 
-
+// update
 app.get("/urls", (req, res) => {
+    let userIDCookie = req.cookies["user_id"]
     let templateVars = {
-        username: req.cookies["username"],
-        urls: urlDatabase
+        userObject: users[userIDCookie],
+        urls: urlDatabase,
     };
+
     res.render("urls_index", templateVars)
 })
 
@@ -76,7 +79,7 @@ app.post('/register', (req, res) => {
 
     if (!userEmail || !password) {
         res.status(400).send("400: One of the fields is empty! Please enter a valid username and password")
-    } else if (validateUsers(userEmail)) {
+    } else if (doesUserNameExist(userEmail)) {
         res.status(400).send("400: The email entered already exists! Please enter a valid email address")
     } else {
         let randomUserID = generateRandomString();
@@ -90,10 +93,6 @@ app.post('/register', (req, res) => {
     }
     console.log(users)
 });
-
-
-
-
 
 
 
@@ -112,8 +111,9 @@ app.post('/urls/:shortURL', (req, res) => {
 })
 
 app.get("/urls/new", (req, res) => {
+    let userIDCookie = req.cookies["user_id"]
     let templateVars = {
-        username: req.cookies["username"]
+        userObject: users[userIDCookie]
     }
     res.render("urls_new", templateVars);
 });
@@ -129,9 +129,10 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+    let userIDCookie = req.cookies["user_id"]
     let shortURL = req.params.shortURL
     let templateVars = {
-        username: req.cookies["username"],
+        userObject: users[userIDCookie],
         shortURL: req.params.shortURL,
         longURL: urlDatabase[shortURL]
     };
