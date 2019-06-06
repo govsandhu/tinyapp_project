@@ -13,6 +13,19 @@ var urlDatabase = {
     "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+    "userRandomID": {
+        id: "userRandomID",
+        email: "user@example.com",
+        password: "purple-monkey-dinosaur"
+    },
+    "user2RandomID": {
+        id: "user2RandomID",
+        email: "user2@example.com",
+        password: "dishwasher-funk"
+    }
+}
+
 
 
 const generateRandomString = function() {
@@ -39,6 +52,25 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars)
 })
 
+app.get("/register", (req, res) => {
+    let templateVars = {
+        users: users
+    };
+    res.render("register", templateVars)
+})
+app.post('/register', (req, res) => {
+    let randomUserID = generateRandomString();
+    const userEmail = req.body.email;
+    const password = req.body.password
+    users[randomUserID] = {
+        'id': randomUserID,
+        'email': userEmail,
+        'password': password
+    };
+    res.cookie('user_id', randomUserID);
+    res.redirect('/urls');
+});
+
 app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect('/urls');
@@ -62,10 +94,12 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
     let newLongURL = req.body.longURL
+
+
     let newShortURL = generateRandomString()
     urlDatabase[newShortURL] = newLongURL
 
-    res.redirect(`/urls/${newShortURL}`);
+    res.redirect(`/urls/${newShortURL}`)
 });
 
 app.get("/urls/:shortURL", (req, res) => {
