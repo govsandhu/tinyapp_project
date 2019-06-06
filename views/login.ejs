@@ -12,17 +12,6 @@
 <body style="font-size:20px; padding:50px;">
     <header>
         <% include ./partials/_header %>
-    </header>
-    <a href='#'>Create New TinyURL</a>
-    <br>
-    <br>
-    <strong>
-        <%= `TinyURL for ${longURL}: ${shortURL}` %>
-    </strong>
-    <form method="POST" action="/urls/<%= shortURL %>">
-        <input type="text" placeholder="Update your URL here!" name="updatedLongURL">
-        <button type="submit">Update</button>
-    </form>
 </body>
 
 </html>
