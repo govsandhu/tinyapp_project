@@ -18,7 +18,7 @@
     <ul>
         <% for (let i in urls) { %>
         <li>
-            <%= i + ": " + urls[i] %>
+            <%= urls[i].shortUrl + ": " + urls[i].longUrl %>
             <a class="btn btn-primary btn-sm" href="http://localhost:8080/urls/<%= i %>" role="button">Edit</a>
             <form method="POST" action="/urls/<%= i %>/delete" style="display: inline-block">
                 <button type="submit" class="btn btn-primary btn-sm">Delete URL</button>

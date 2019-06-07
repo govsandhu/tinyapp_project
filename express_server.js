@@ -9,9 +9,9 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 var urlDatabase = {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "9sm5xK": "http://www.google.com"
-};
+    b2xVn2: { longURL: "http://www.lighthouselabs.ca", user_id: "userRandomID" },
+    ism5xK: { longURL: "http://www.google.com", user_id: "user2RandomID" }
+  };
 
 const users = {
     "userRandomID": {
@@ -66,10 +66,29 @@ app.get('/login', (req, res) => {
 
 app.get("/urls", (req, res) => {
     let userIDCookie = req.cookies["user_id"]
+    let urlArray = [];
+    if (!userIDCookie) {
+      res.status(403).send("Please log in")
+      return;
+    }
+    let urlsForUser = (userIDCookie) => {
+      if(userIDCookie) {
+        for (let urlID in urlDatabase) {
+          if(urlDatabase[urlID].user_id === userIDCookie) {
+             urlArray.push({
+              shortUrl: urlID,
+              longUrl: urlDatabase[urlID].longURL
+            })
+          }
+        }
+    }
+    }
+    urlsForUser(userIDCookie);
     let templateVars = {
         userObject: users[userIDCookie],
-        urls: urlDatabase,
+        urls: urlArray,
     };
+    console.log(urlArray)
 
     res.render("urls_index", templateVars)
 })
@@ -124,7 +143,11 @@ app.get("/urls/new", (req, res) => {
     let templateVars = {
         userObject: users[userIDCookie]
     }
+    if (userIDCookie) {
     res.render("urls_new", templateVars);
+  } else {
+    res.redirect('/login')
+  }
 });
 
 app.post("/urls", (req, res) => {
