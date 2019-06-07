@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -13,18 +15,8 @@ var urlDatabase = {
     ism5xK: { longURL: "http://www.google.com", user_id: "user2RandomID" }
   };
 
-const users = {
-    "userRandomID": {
-        id: "userRandomID",
-        email: "user@example.com",
-        password: "123"
-    },
-    "user2RandomID": {
-        id: "user2RandomID",
-        email: "user2@example.com",
-        password: "dishwasher-funk"
-    }
-}
+const users = {}
+
 
 function doesUserNameExist(userEmail) {
     let userExists = false;
@@ -102,7 +94,9 @@ app.get("/register", (req, res) => {
 // This retrieves inputs by the user from the register page. If the fields are empty, or if the username doesn't exit, it will throw an error. If it passes those two criteria points, the name will be registered and added to the users object.
 app.post('/register', (req, res) => {
     const userEmail = req.body.email;
-    const password = req.body.password
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    console.log(hashedPassword)
 
     if (!userEmail || !password) {
         res.status(400).send("400: One of the fields is empty! Please enter a valid username and password")
@@ -113,8 +107,9 @@ app.post('/register', (req, res) => {
         users[randomUserID] = {
             'id': randomUserID,
             'email': userEmail,
-            'password': password
+            'password': hashedPassword
         }
+        console.log(users)
         res.cookie('user_id', randomUserID);
         res.redirect('/urls');
     }
@@ -164,11 +159,16 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-//Can this be removed? Should the user be able to create a url from the urls page? The fields are currently missing.
+// This creates the short
 app.post("/urls", (req, res) => {
     let newLongURL = req.body.longURL
     let newShortURL = generateRandomString()
-    urlDatabase[newShortURL] = newLongURL
+    let userIDCookie = req.cookies["user_id"]
+    console.log(newLongURL)
+    urlDatabase[newShortURL] = {
+      longURL: newLongURL,
+      user_id: userIDCookie
+    };
     res.redirect(`/urls/${newShortURL}`)
 });
 
@@ -196,7 +196,8 @@ app.post("/login", (req, res) => {
     let enteredPassword = req.body.password;
     if(doesUserNameExist(userEmail)) {
       for (let userID in users) {
-        if (users[userID].password === enteredPassword) {
+        let hashedPassword = users[userID].password
+        if (bcrypt.compareSync(enteredPassword, hashedPassword)) {
           res.cookie("user_id", userID)
           res.redirect('/urls')
         }
@@ -210,6 +211,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
     res.clearCookie('user_id');
     res.redirect('/urls');
+    console.log(users)
 
 })
 
