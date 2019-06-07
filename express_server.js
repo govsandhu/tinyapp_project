@@ -57,8 +57,9 @@ const generateRandomString = function() {
 
 
 app.get('/login', (req, res) => {
+    let userIDCookie = req.cookies["user_id"]
     let templateVars = {
-        users: users
+        userObject: users[userIDCookie]
     }
     res.render("login", templateVars)
 })
@@ -74,8 +75,10 @@ app.get("/urls", (req, res) => {
 })
 
 app.get("/register", (req, res) => {
+    let userIDCookie = req.cookies["user_id"]
     let templateVars = {
-        users: users
+      userObject: users[userIDCookie],
+
     };
     res.render("register", templateVars)
 })
@@ -149,9 +152,6 @@ app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[req.params.shortURL]
     res.redirect(longURL);
 });
-
-
-
 
 
 app.post("/login", (req, res) => {
