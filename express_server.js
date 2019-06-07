@@ -64,7 +64,7 @@ app.get('/login', (req, res) => {
 })
 
 app.get("/urls", (req, res) => {
-    let userIDCookie = req.cookies["userID"]
+    let userIDCookie = req.cookies["user_id"]
     let templateVars = {
         userObject: users[userIDCookie],
         urls: urlDatabase,
@@ -157,16 +157,16 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
     let userEmail = req.body.email;
     let enteredPassword = req.body.password;
-    if(doesUserNameExist) {
+    if(doesUserNameExist(userEmail)) {
       for (let userID in users) {
         if (users[userID].password === enteredPassword) {
-          res.cookie("userID", userID)
+          res.cookie("user_id", userID)
           res.redirect('/urls')
         }
       }
-    } else {
-      res.status(403).send("403: The email or password entered is incorrect")
     }
+      res.status(403).send("403: The email or password entered is incorrect")
+      res.redirect('/login')
 })
 
 app.post("/logout", (req, res) => {
