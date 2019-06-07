@@ -17,7 +17,7 @@ const users = {
     "userRandomID": {
         id: "userRandomID",
         email: "user@example.com",
-        password: "purple-monkey-dinosaur"
+        password: "123"
     },
     "user2RandomID": {
         id: "user2RandomID",
@@ -28,7 +28,7 @@ const users = {
 
 
 
-const doesUserNameExist = (userEmail) => {
+function doesUserNameExist(userEmail) {
     let userExists = false;
     for (let id in users) {
         if (users[id].email === userEmail) {
@@ -56,9 +56,15 @@ const generateRandomString = function() {
 }
 
 
-// update
+app.get('/login', (req, res) => {
+    let templateVars = {
+        users: users
+    }
+    res.render("login", templateVars)
+})
+
 app.get("/urls", (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.cookies["userID"]
     let templateVars = {
         userObject: users[userIDCookie],
         urls: urlDatabase,
@@ -144,14 +150,27 @@ app.get("/u/:shortURL", (req, res) => {
     res.redirect(longURL);
 });
 
+
+
+
+
 app.post("/login", (req, res) => {
-    let username = req.body.username;
-    res.cookie("username", username)
-    res.redirect('/urls')
+    let userEmail = req.body.email;
+    let enteredPassword = req.body.password;
+    if(doesUserNameExist) {
+      for (let userID in users) {
+        if (users[userID].password === enteredPassword) {
+          res.cookie("userID", userID)
+          res.redirect('/urls')
+        }
+      }
+    } else {
+      res.status(403).send("403: The email or password entered is incorrect")
+    }
 })
 
 app.post("/logout", (req, res) => {
-    res.clearCookie('username');
+    res.clearCookie('user_id');
     res.redirect('/urls');
 
 })
