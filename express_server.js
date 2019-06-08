@@ -1,28 +1,29 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession( {
+  name: 'user_id',
+  keys: ['key1', 'key2']
+}));
+
 app.set("view engine", "ejs");
 
-var urlDatabase = {
-    b2xVn2: { longURL: "http://www.lighthouselabs.ca", user_id: "userRandomID" },
-    ism5xK: { longURL: "http://www.google.com", user_id: "user2RandomID" }
-  };
+var urlDatabase = {};
 
-const users = {}
+const users = {};
 
 
 function doesUserNameExist(userEmail) {
     let userExists = false;
     for (let id in users) {
         if (users[id].email === userEmail) {
-            userExists = true;
+            userExists = users[id];
             break;
         }
     }
@@ -45,7 +46,7 @@ const generateRandomString = function() {
 
 // This renders the login page. Template vars is an object that gets passed to the login.ejs page. In this case, it passes the cookie object for the associated client ID.
 app.get('/login', (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id;
     let templateVars = {
         userObject: users[userIDCookie]
     }
@@ -54,7 +55,7 @@ app.get('/login', (req, res) => {
 
 // This adds logic to the urls page. If a cookie doesn't exist, ie. if the user is not logged in, they will receive a message to do so.
 app.get("/urls", (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id
     let urlArray = [];
     if (!userIDCookie) {
       res.status(403).send("Please log in")
@@ -83,7 +84,7 @@ app.get("/urls", (req, res) => {
 
 // This renders the register page and passes the object of the associated cookie to the register template. In this case, the object should be empty.
 app.get("/register", (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id
     let templateVars = {
       userObject: users[userIDCookie],
 
@@ -96,7 +97,6 @@ app.post('/register', (req, res) => {
     const userEmail = req.body.email;
     const password = req.body.password;
     const hashedPassword = bcrypt.hashSync(password, 10);
-    console.log(hashedPassword)
 
     if (!userEmail || !password) {
         res.status(400).send("400: One of the fields is empty! Please enter a valid username and password")
@@ -109,8 +109,7 @@ app.post('/register', (req, res) => {
             'email': userEmail,
             'password': hashedPassword
         }
-        console.log(users)
-        res.cookie('user_id', randomUserID);
+        req.session.user_id = randomUserID;
         res.redirect('/urls');
     }
 });
@@ -118,9 +117,8 @@ app.post('/register', (req, res) => {
 
 // This allows the user to delete an existing url if the user is logged in.
 app.post('/urls/:shortURL/delete', (req, res) => {
-    let userIDCookie = req.cookies["user_id"];
+    let userIDCookie = req.session.user_id;
     let shortURL = req.params.shortURL
-    console.log(userIDCookie)
       if (urlDatabase[shortURL]) {
         if (urlDatabase[shortURL].user_id === userIDCookie) {
             delete urlDatabase[req.params.shortURL];
@@ -135,7 +133,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 //This allows a user to update an existing url from the current shortURL.
 app.post('/urls/:shortURL', (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id;
     const updatedLongURL = req.body.updatedLongURL;
     const shortURL = req.params.shortURL;
       if (urlDatabase[shortURL]) {
@@ -148,7 +146,7 @@ app.post('/urls/:shortURL', (req, res) => {
 
 // This allows the user to create a new url.
 app.get("/urls/new", (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id
     let templateVars = {
         userObject: users[userIDCookie]
     }
@@ -163,9 +161,8 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
     let newLongURL = req.body.longURL
     let newShortURL = generateRandomString()
-    let userIDCookie = req.cookies["user_id"]
-    console.log(newLongURL)
-    urlDatabase[newShortURL] = {
+    let userIDCookie = req.session.user_id
+      urlDatabase[newShortURL] = {
       longURL: newLongURL,
       user_id: userIDCookie
     };
@@ -174,7 +171,7 @@ app.post("/urls", (req, res) => {
 
 //This shows the user the current url selected
 app.get("/urls/:shortURL", (req, res) => {
-    let userIDCookie = req.cookies["user_id"]
+    let userIDCookie = req.session.user_id
     let shortURL = req.params.shortURL
     let templateVars = {
         userObject: users[userIDCookie],
@@ -194,26 +191,23 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
     let userEmail = req.body.email;
     let enteredPassword = req.body.password;
-    if(doesUserNameExist(userEmail)) {
-      for (let userID in users) {
-        let hashedPassword = users[userID].password
+    let foundUser = doesUserNameExist(userEmail)
+       if(foundUser) {
+        let hashedPassword = foundUser.password
         if (bcrypt.compareSync(enteredPassword, hashedPassword)) {
-          res.cookie("user_id", userID)
-          res.redirect('/urls')
+          req.session.user_id = foundUser.id;
+          return res.redirect('/urls');
         }
-      }
     }
-      res.status(403).send("403: The email or password entered is incorrect")
-      res.redirect('/login')
+      return res.status(403).send("403: The email or password entered is incorrect")
 })
 
 //This clears the cookie and logs the user out.
 app.post("/logout", (req, res) => {
-    res.clearCookie('user_id');
+    req.session = null;
     res.redirect('/urls');
-    console.log(users)
-
 })
+
 
 app.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}!`);
